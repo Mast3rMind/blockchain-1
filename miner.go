@@ -29,11 +29,36 @@ package blockchain
 type Miner struct {
 	Name        string
 	POW         ProofOfWork
-	RewardTotal float64
-	Challenge   string
-	Difficulty  int
+	Address		Address
 }
 
-func (m *Miner) Mine() Proof {
-	return m.POW.Solve(m.Challenge, m.Difficulty)
+func (m *Miner) Mine(challenge string, difficulty int) Proof {
+	return m.POW.Solve(challenge, difficulty)
+}
+
+func (m *Miner) SelectTransactions(blockchain *Blockchain, n int) []Transaction {
+	var transactions []Transaction
+
+	if len(blockchain.MemoryPool) == 0 {
+		return transactions
+	}
+
+	// We must also check the memory pool for the transaction values and make sure that, if multiple transactions are
+	// made in the same block, the balance does not go below zero. This will make sure that such transactions are not
+	// confirmed to the blockchain.
+	totals := make(map[string]float64)
+
+	for i := 0; i < n; i++ {
+		from := blockchain.MemoryPool[i].From
+		txamount := blockchain.MemoryPool[i].Amount
+
+		if (from.GetBalance(blockchain) - totals[from.Identifier]) - txamount >= 0 {
+			transactions = append(transactions, blockchain.MemoryPool[i])
+			totals[from.Identifier] += txamount
+		}
+	}
+
+	// TODO For sure there is a better way to do this
+	blockchain.MemoryPool = blockchain.MemoryPool[n:]
+	return transactions
 }

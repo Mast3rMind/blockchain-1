@@ -33,34 +33,37 @@ type Block struct {
 	Index        int
 	PreviousHash string
 	Timestamp    time.Time
-	Data         string
 	Hash         string
+	MinedBy string
+	Transactions []Transaction
 }
 
 func (b *Block) compute() string {
 	hasher := sha512.New()
-	hasher.Write([]byte(strconv.Itoa(b.Index) + b.PreviousHash + b.Timestamp.String() + b.Data))
+	hasher.Write([]byte(strconv.Itoa(b.Index) + b.PreviousHash + b.Timestamp.String() + b.MinedBy))
 	return hex.EncodeToString(hasher.Sum(nil))
 }
 
-func Genesis(data string) Block {
+func Genesis(minedBy string, transactions []Transaction) Block {
 	genesis := Block{
 		Index:        0,
 		PreviousHash: "0",
 		Timestamp:    time.Now(),
-		Data:         data,
+		MinedBy: minedBy,
+		Transactions: transactions,
 	}
 
 	genesis.Hash = genesis.compute()
 	return genesis
 }
 
-func NewBlock(previous Block, data string) Block {
+func NewBlock(previous Block, minedBy string, transactions []Transaction) Block {
 	block := Block{
 		Index:        previous.Index + 1,
 		PreviousHash: previous.Hash,
 		Timestamp:    time.Now(),
-		Data:         data,
+		Transactions: transactions,
+		MinedBy: minedBy,
 	}
 
 	block.Hash = block.compute()

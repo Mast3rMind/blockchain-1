@@ -38,12 +38,17 @@ type Blockchain struct {
 	DifficultyChanges int
 	Difficulty        int
 	Reward            float64
+	MemoryPool		  []Transaction
+}
+
+func (chain *Blockchain) AddTransaction(transaction Transaction) {
+	chain.MemoryPool = append(chain.MemoryPool, transaction)
 }
 
 // AddGenesisBlock should be the first operation to perform when initializing a new blockchain. It adds the first
 // block to the blockchain and does not require a PoW.
-func (chain *Blockchain) AddGenesisBlock(data string) {
-	chain.Blocks = append(chain.Blocks, Genesis(data))
+func (chain *Blockchain) AddGenesisBlock(minedBy string, transactions []Transaction) {
+	chain.Blocks = append(chain.Blocks, Genesis(minedBy, transactions))
 	chain.Challenge = chain.generateNewChallenge()
 }
 
@@ -68,7 +73,7 @@ func (chain *Blockchain) DoWork() Proof {
 
 // AddBlock adds a new block to the blockchain. It will require the data to be added to the blockchain as well as a
 // proof of work that proves that the client has done the necessary work.
-func (chain *Blockchain) AddBlock(data string, proof Proof, miner *Miner) error {
+func (chain *Blockchain) AddBlock(proof Proof, miner *Miner, transactions []Transaction) error {
 	if !chain.POW.Verify(chain.Challenge, chain.Difficulty, proof) {
 		return errors.New("Invalid proof of work. Request to add block rejected")
 	}
@@ -78,14 +83,11 @@ func (chain *Blockchain) AddBlock(data string, proof Proof, miner *Miner) error 
 	}
 
 	previous := chain.getLastBlock()
-	block := NewBlock(previous, data)
+	block := NewBlock(previous, miner.Name, transactions)
 
 	chain.Blocks = append(chain.Blocks, block)
 	chain.Challenge = chain.generateNewChallenge()
 
-	miner.RewardTotal += chain.Reward
-
-	// Difficulty changes every X blocks and the reward halves as well
 	if len(chain.Blocks)%chain.DifficultyChanges == 0 {
 		chain.Difficulty++
 		chain.Reward /= 2
