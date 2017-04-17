@@ -23,8 +23,8 @@ package blockchain
  * SOFTWARE.
  */
 import (
-	"testing"
 	"math/rand"
+	"testing"
 	"time"
 )
 
@@ -35,7 +35,7 @@ func initializeBlockchain() (*Blockchain, Miner, []Address) {
 	var initialTx []Transaction
 
 	// Miners
-	miner := Miner{Name: "Velhote Pool", POW: pow }
+	miner := Miner{Name: "Velhote Pool", POW: pow}
 
 	seed := rand.NewSource(time.Now().UnixNano())
 	rnd := rand.New(seed)
@@ -45,23 +45,23 @@ func initializeBlockchain() (*Blockchain, Miner, []Address) {
 	// Wallets
 	var addresses []Address
 	for i := 0; i < 15; i++ {
-		address := Address{ Identifier: GenerateAddress() }
+		address := Address{Identifier: GenerateAddress()}
 		addresses = append(addresses, address)
-		initialTx = append(initialTx, Transaction{Hash: genesisAddress, From: Address{ Identifier: GenerateAddress() }, To: address, Amount: 1})
+		initialTx = append(initialTx, Transaction{Hash: genesisAddress, From: Address{Identifier: GenerateAddress()}, To: address, Amount: 1})
 	}
 
 	// Generate Transactions
 	for i := 0; i < 1000; i++ {
 		from := addresses[rnd.Intn(len(addresses))]
-		to :=  addresses[rnd.Intn(len(addresses))]
+		to := addresses[rnd.Intn(len(addresses))]
 
 		for from == to {
-			to =  addresses[rnd.Intn(len(addresses))]
+			to = addresses[rnd.Intn(len(addresses))]
 		}
 
 		amount := rnd.Float64()
 
-		blockchain.MemoryPool = append(blockchain.MemoryPool, Transaction{ From: from, To: to, Amount: amount, Fee: 0 })
+		blockchain.MemoryPool = append(blockchain.MemoryPool, Transaction{From: from, To: to, Amount: amount, Fee: 0})
 	}
 
 	blockchain.AddGenesisBlock("The Times 03/Jan/2009 Chancellor on brink of second bailout for banks", initialTx)

@@ -27,9 +27,9 @@ package blockchain
 // in the Bitcoin/Cryptocoin ecosystem. The miner will register in the Blockchain and produce the work required to be
 // able to register blocks in the system and receive rewards when they add/mine a block.
 type Miner struct {
-	Name        string
-	POW         ProofOfWork
-	Address		Address
+	Name    string
+	POW     ProofOfWork
+	Address Address
 }
 
 func (m *Miner) Mine(challenge string, difficulty int) Proof {
@@ -52,7 +52,7 @@ func (m *Miner) SelectTransactions(blockchain *Blockchain, n int) []Transaction 
 		from := blockchain.MemoryPool[i].From
 		txamount := blockchain.MemoryPool[i].Amount
 
-		if (from.GetBalance(blockchain) - totals[from.Identifier]) - txamount >= 0 {
+		if (from.GetBalance(blockchain)-totals[from.Identifier])-txamount >= 0 {
 			transactions = append(transactions, blockchain.MemoryPool[i])
 			totals[from.Identifier] += txamount
 		}

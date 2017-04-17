@@ -34,7 +34,7 @@ type Block struct {
 	PreviousHash string
 	Timestamp    time.Time
 	Hash         string
-	MinedBy string
+	MinedBy      string
 	Transactions []Transaction
 }
 
@@ -49,7 +49,7 @@ func Genesis(minedBy string, transactions []Transaction) Block {
 		Index:        0,
 		PreviousHash: "0",
 		Timestamp:    time.Now(),
-		MinedBy: minedBy,
+		MinedBy:      minedBy,
 		Transactions: transactions,
 	}
 
@@ -63,7 +63,7 @@ func NewBlock(previous Block, minedBy string, transactions []Transaction) Block 
 		PreviousHash: previous.Hash,
 		Timestamp:    time.Now(),
 		Transactions: transactions,
-		MinedBy: minedBy,
+		MinedBy:      minedBy,
 	}
 
 	block.Hash = block.compute()

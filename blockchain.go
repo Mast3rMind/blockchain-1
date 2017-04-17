@@ -38,7 +38,7 @@ type Blockchain struct {
 	DifficultyChanges int
 	Difficulty        int
 	Reward            float64
-	MemoryPool		  []Transaction
+	MemoryPool        []Transaction
 }
 
 func (chain *Blockchain) AddTransaction(transaction Transaction) {
