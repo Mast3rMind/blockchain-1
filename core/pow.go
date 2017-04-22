@@ -1,5 +1,5 @@
-// Package blockchain contains code related to this amazing custom blockchain including miners and a PoW algorithm
-package blockchain
+// Package core contains code related to this amazing custom blockchain including miners and a PoW algorithm
+package core
 
 /**
  * The MIT License (MIT)
@@ -22,26 +22,52 @@ package blockchain
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import "testing"
+import (
+	"crypto/sha512"
+	"encoding/hex"
+	"strconv"
+	"strings"
+)
 
-func TestHelloWorld_Verify(t *testing.T) {
-	pow := ProofOfWork{}
+type Proof struct {
+	Variation string
+	Solution  string
+}
 
-	work := "These pretzels are making me thirsty"
-	solution := "0086b692327e3a60b4884ed0f91853ccb16bd38d197df69da6bfc660820a4c0aeeac5d35a911ac2e14ce54b402cce0ae7c00c3a01c976ea54cd18902f0a6855e"
+type ProofOfWork struct {
+}
 
-	proof := pow.Solve(work, 2)
+func (pow *ProofOfWork) Verify(work string, difficulty int, proof Proof) bool {
+	zeroes := strings.Repeat("0", difficulty)
+	hasher := sha512.New()
 
-	t.Logf("Solution: %s", proof.Solution)
-	t.Logf("Variation: %s", proof.Variation)
+	hasher.Write([]byte(work + proof.Variation))
+	solution := hex.EncodeToString(hasher.Sum(nil))
 
-	verified := pow.Verify(work, 2, proof)
+	return strings.HasPrefix(solution, zeroes) && solution == proof.Solution
+}
 
-	if proof.Solution != solution {
-		t.Errorf("The solution from the proof is different from the expected solution -- %s vs %s --", proof.Solution, solution)
+func (pow *ProofOfWork) Solve(work string, difficulty int) Proof {
+	solution := ""
+	zeroes := strings.Repeat("0", difficulty)
+
+	variation := 0
+
+	for {
+		hasher := sha512.New()
+
+		hasher.Write([]byte(work + strconv.Itoa(variation)))
+		solution = hex.EncodeToString(hasher.Sum(nil))
+
+		if strings.HasPrefix(solution, zeroes) {
+			break
+		}
+
+		variation++
 	}
 
-	if verified != true {
-		t.Errorf("Solution -- %s -- is incorrect. It should be -- %s --", proof.Solution, solution)
+	return Proof{
+		Variation: strconv.Itoa(variation),
+		Solution:  solution,
 	}
 }

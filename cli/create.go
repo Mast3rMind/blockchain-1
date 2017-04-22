@@ -1,5 +1,5 @@
-// Package blockchain contains code related to this amazing custom blockchain including miners and a PoW algorithm
-package blockchain
+// Package cli contains the CLI commands that power the wallet application
+package cli
 
 /**
  * The MIT License (MIT)
@@ -22,10 +22,21 @@ package blockchain
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-type Transaction struct {
-	From   Address
-	To     Address
-	Amount float64
-	Fee    float64
-	Hash   string
+import (
+	"github.com/rvelhote/blockchain/core"
+	"os"
+	"path"
+)
+
+func Create() (core.Address, error) {
+	address := core.NewAddress(core.GenerateAddress())
+	file, err := os.Create(path.Join(".wallet", address.Identifier))
+
+	if err != nil {
+		return core.Address{}, err
+	}
+
+	defer file.Close()
+
+	return address, nil
 }

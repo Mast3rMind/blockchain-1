@@ -3,7 +3,7 @@ A very basic blockchain that I am implementing just for fun and learning (no pro
 blockchain (the blocks are stored in an array).
 
 The proof of work is simply hashing a string until X amount of zeroes (given by current difficulty) is found. There 
-is no secret to it just looping until found.
+is no secret to it - just looping until found.
 
 ## Features
 This package features what you'd expect from a blockchain:
@@ -17,3 +17,4 @@ This package features what you'd expect from a blockchain:
 - Cancelation of mining work if a block is added which changes the challenge and the difficulty
 - Transaction and Wallet Addresses
 - Blockchain Explorer
+- Improve the cryptography to use more "realistic" blockchain cryptography (e.g. merkle trees)

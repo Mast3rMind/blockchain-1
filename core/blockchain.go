@@ -1,5 +1,5 @@
-// Package blockchain contains code related to this amazing custom blockchain including miners and a PoW algorithm
-package blockchain
+// Package core contains code related to this amazing custom blockchain including miners and a PoW algorithm
+package core
 
 /**
  * The MIT License (MIT)

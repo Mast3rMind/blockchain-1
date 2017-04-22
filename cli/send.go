@@ -1,5 +1,5 @@
-// Package blockchain contains code related to this amazing custom blockchain including miners and a PoW algorithm
-package blockchain
+// Package cli contains the CLI commands that power the wallet application
+package cli
 
 /**
  * The MIT License (MIT)
@@ -23,51 +23,29 @@ package blockchain
  * SOFTWARE.
  */
 import (
-	"crypto/sha512"
-	"encoding/hex"
-	"strconv"
-	"strings"
+	"bytes"
+	"encoding/json"
+	"github.com/rvelhote/blockchain/core"
+	"net/http"
+	"time"
 )
 
-type Proof struct {
-	Variation string
-	Solution  string
-}
+func Send(transaction core.Transaction) (bool, error) {
+	requestBody := new(bytes.Buffer)
+	json.NewEncoder(requestBody).Encode(transaction)
 
-type ProofOfWork struct {
-}
+	httpClient := &http.Client{Timeout: time.Second * 10}
+	response, err := httpClient.Post("http://127.0.0.1:8080/send", "application/json", requestBody)
 
-func (pow *ProofOfWork) Verify(work string, difficulty int, proof Proof) bool {
-	zeroes := strings.Repeat("0", difficulty)
-	hasher := sha512.New()
-
-	hasher.Write([]byte(work + proof.Variation))
-	solution := hex.EncodeToString(hasher.Sum(nil))
-
-	return strings.HasPrefix(solution, zeroes) && solution == proof.Solution
-}
-
-func (pow *ProofOfWork) Solve(work string, difficulty int) Proof {
-	solution := ""
-	zeroes := strings.Repeat("0", difficulty)
-
-	variation := 0
-
-	for {
-		hasher := sha512.New()
-
-		hasher.Write([]byte(work + strconv.Itoa(variation)))
-		solution = hex.EncodeToString(hasher.Sum(nil))
-
-		if strings.HasPrefix(solution, zeroes) {
-			break
-		}
-
-		variation++
+	if err != nil {
+		return false, err
 	}
 
-	return Proof{
-		Variation: strconv.Itoa(variation),
-		Solution:  solution,
+	defer response.Body.Close()
+
+	if response.StatusCode != 200 {
+		return false, err
 	}
+
+	return true, nil
 }

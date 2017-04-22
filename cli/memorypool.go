@@ -1,5 +1,5 @@
-// Package blockchain contains code related to this amazing custom blockchain including miners and a PoW algorithm
-package blockchain
+// Package cli contains the CLI commands that power the wallet application
+package cli
 
 /**
  * The MIT License (MIT)
@@ -23,49 +23,22 @@ package blockchain
  * SOFTWARE.
  */
 import (
-	"crypto/sha512"
-	"encoding/hex"
-	"strconv"
-	"time"
+	"github.com/rvelhote/blockchain/core"
+	"net/http"
 )
 
-type Block struct {
-	Index        int
-	PreviousHash string
-	Timestamp    time.Time
-	Hash         string
-	MinedBy      string
-	Transactions []Transaction
-}
+func MemoryPool() ([]core.Transaction, error) {
+	response, err := http.Get("http://127.0.0.1:8080/memorypool")
 
-func (b *Block) compute() string {
-	hasher := sha512.New()
-	hasher.Write([]byte(strconv.Itoa(b.Index) + b.PreviousHash + b.Timestamp.String() + b.MinedBy))
-	return hex.EncodeToString(hasher.Sum(nil))
-}
-
-func Genesis(minedBy string, transactions []Transaction) Block {
-	genesis := Block{
-		Index:        0,
-		PreviousHash: "0",
-		Timestamp:    time.Now(),
-		MinedBy:      minedBy,
-		Transactions: transactions,
+	if err != nil {
+		return nil, err
 	}
 
-	genesis.Hash = genesis.compute()
-	return genesis
-}
+	defer response.Body.Close()
 
-func NewBlock(previous Block, minedBy string, transactions []Transaction) Block {
-	block := Block{
-		Index:        previous.Index + 1,
-		PreviousHash: previous.Hash,
-		Timestamp:    time.Now(),
-		Transactions: transactions,
-		MinedBy:      minedBy,
+	if response.StatusCode != 200 {
+		return nil, err
 	}
 
-	block.Hash = block.compute()
-	return block
+	return nil, nil
 }
